@@ -1,0 +1,21 @@
+workflows:
+  android-apk:
+    name: Tarif Defteri APK
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+    scripts:
+      - name: Android projesini olustur ve kodu icine kopyala
+        script: |
+          flutter create build_app --platforms=android --project-name tarif_defteri
+          rm -rf build_app/lib build_app/test
+          cp -r lib build_app/lib
+          cp pubspec.yaml build_app/pubspec.yaml
+      - name: APK derle
+        script: |
+          cd build_app
+          flutter pub get
+          flutter build apk --release
+    artifacts:
+      - build_app/build/app/outputs/flutter-apk/*.apk
