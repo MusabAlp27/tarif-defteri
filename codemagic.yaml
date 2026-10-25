@@ -11,14 +11,33 @@ workflows:
           rm -rf build_app/lib build_app/test
           cp -r lib build_app/lib
           cp pubspec.yaml build_app/pubspec.yaml
-      - name: Kod kucultmeyi kapat
+      - name: R8 kural dosyasini ekle
         script: |
           cd build_app/android/app
+          echo "-dontwarn com.google.mlkit.vision.text.**" > proguard-rules.pro
           if [ -f build.gradle.kts ]; then
-            sed -i 's/signingConfig = signingConfigs.getByName("debug")/signingConfig = signingConfigs.getByName("debug")\n            isMinifyEnabled = false\n            isShrinkResources = false/' build.gradle.kts
+          cat >> build.gradle.kts <<'EOF'
+
+          android {
+              buildTypes {
+                  release {
+                      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+                  }
+              }
+          }
+          EOF
           fi
           if [ -f build.gradle ]; then
-            sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.debug\n            minifyEnabled false\n            shrinkResources false/' build.gradle
+          cat >> build.gradle <<'EOF'
+
+          android {
+              buildTypes {
+                  release {
+                      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+                  }
+              }
+          }
+          EOF
           fi
       - name: APK derle
         script: |
