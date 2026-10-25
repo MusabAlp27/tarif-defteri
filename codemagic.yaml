@@ -1,7 +1,6 @@
 workflows:
   android-apk:
     name: Tarif Defteri APK
-    instance_type: 
     max_build_duration: 30
     environment:
       flutter: stable
@@ -12,10 +11,19 @@ workflows:
           rm -rf build_app/lib build_app/test
           cp -r lib build_app/lib
           cp pubspec.yaml build_app/pubspec.yaml
+      - name: Kod kucultmeyi kapat
+        script: |
+          cd build_app/android/app
+          if [ -f build.gradle.kts ]; then
+            sed -i 's/signingConfig = signingConfigs.getByName("debug")/signingConfig = signingConfigs.getByName("debug")\n            isMinifyEnabled = false\n            isShrinkResources = false/' build.gradle.kts
+          fi
+          if [ -f build.gradle ]; then
+            sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.debug\n            minifyEnabled false\n            shrinkResources false/' build.gradle
+          fi
       - name: APK derle
         script: |
           cd build_app
           flutter pub get
-          flutter build apk --release--no-shrink
+          flutter build apk --release
     artifacts:
       - build_app/build/app/outputs/flutter-apk/*.apk
